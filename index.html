@@ -26,39 +26,39 @@
                 </header>
                 <section class="sub-categoria low">
                     <ul>
-                        <li>Mirtilos (até 40g)</li>
-                        <li>Morangos</li>
-                        <li>Framboesas (até 30g)</li>
-                        <li>Laranja</li>
-                        <li>Tangerina</li>
-                        <li>Kiwi</li>
-                        <li>Uvas</li>
-                        <li>Abacaxi (em porções pequenas)</li>
-                        <li>Melão-cantalupo (em porções pequenas)</li>
-                        <li>Papaia</li>
+                        <li class="item" draggable="true">Mirtilos (até 40g)</li>
+                        <li class="item" draggable="true">Morangos</li>
+                        <li class="item" draggable="true">Framboesas (até 30g)</li>
+                        <li class="item" draggable="true">Laranja</li>
+                        <li class="item" draggable="true">Tangerina</li>
+                        <li class="item" draggable="true">Kiwi</li>
+                        <li class="item" draggable="true">Uvas</li>
+                        <li class="item" draggable="true">Abacaxi (em porções pequenas)</li>
+                        <li class="item" draggable="true">Melão-cantalupo (em porções pequenas)</li>
+                        <li class="item" draggable="true">Papaia</li>
                     </ul>
                 </section>
                 <section class="sub-categoria mid">
                     <ul>
-                        <li>Abacate(até 1/8 da unidade)</li>
-                        <li>Romã (até 45g)</li>
+                        <li class="item" draggable="true">Abacate(até 1/8 da unidade)</li>
+                        <li class="item" draggable="true">Romã (até 45g)</li>
                         
                     </ul>
                 </section>
                 <section class="sub-categoria high">
                     <ul>
-                        <li>Maçã</li>
-                        <li>Pêra</li>
-                        <li>Manga</li>
-                        <li>Melancia</li>
-                        <li>Pêssego</li>
-                        <li>Nectarina</li>
-                        <li>Ameixa</li>
-                        <li>Caqui</li>
-                        <li>Cereja</li>
-                        <li>Damasco</li>
-                        <li>Figo</li>
-                        <li>Frutas secas (tâmaras,passas,alperces secos)</li>
+                        <li class="item" draggable="true">Maçã</li>
+                        <li class="item" draggable="true">Pêra</li>
+                        <li class="item" draggable="true">Manga</li>
+                        <li class="item" draggable="true">Melancia</li>
+                        <li class="item" draggable="true">Pêssego</li>
+                        <li class="item" draggable="true">Nectarina</li>
+                        <li class="item" draggable="true">Ameixa</li>
+                        <li class="item" draggable="true">Caqui</li>
+                        <li class="item" draggable="true">Cereja</li>
+                        <li class="item" draggable="true">Damasco</li>
+                        <li class="item" draggable="true">Figo</li>
+                        <li class="item" draggable="true">Frutas secas (tâmaras,passas,alperces secos)</li>
                     </ul>
                 </section>
             </div>
@@ -240,9 +240,45 @@
 
         <script>
 
+            let itemList = document.getElementsByClassName("item");
             let lowList = document.getElementsByClassName("sub-categoria low");
-            let midList = document.getElementsByClassName("sub-categoria low");
-            let highList = document.getElementsByClassName("sub-categoria low");
+            let midList = document.getElementsByClassName("sub-categoria mid");
+            let highList = document.getElementsByClassName("sub-categoria high");
+
+            for (item of itemList){
+                item.addEventListner("dragstart", function(e) {
+                    let selected = e.target;
+
+                    lowList.addEventListner("dragover", function(e){
+                        e.preventDefault();
+                    });
+
+                    lowList.addEventListner("drop", function(e){
+                        lowList.appendChild(selected);
+                        selected = null;
+                    })
+
+
+                    midList.addEventListner("dragover", function(e){
+                        e.preventDefault();
+                    });
+
+                    midList.addEventListner("drop", function(e){
+                        midList.appendChild(selected);
+                        selected = null;
+                    })
+
+
+                    highList.addEventListner("dragover", function(e){
+                        e.preventDefault();
+                    });
+
+                    highList.addEventListner("drop", function(e){
+                        highList.appendChild(selected);
+                        selected = null;
+                    })
+                })
+            }
 
 
         </script>
