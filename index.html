@@ -25,7 +25,7 @@
                     <h2>Frutas</h2>
                 </header>
                 <section class="sub-categoria low">
-                    <ul>
+                    <ul class="sortableLists">
                         <li class="item" draggable="true">Mirtilos (até 40g)</li>
                         <li class="item" draggable="true">Morangos</li>
                         <li class="item" draggable="true">Framboesas (até 30g)</li>
@@ -39,14 +39,14 @@
                     </ul>
                 </section>
                 <section class="sub-categoria mid">
-                    <ul>
+                    <ul class="sortableLists">
                         <li class="item" draggable="true">Abacate(até 1/8 da unidade)</li>
                         <li class="item" draggable="true">Romã (até 45g)</li>
                         
                     </ul>
                 </section>
                 <section class="sub-categoria high">
-                    <ul>
+                    <ul class="sortableLists">
                         <li class="item" draggable="true">Maçã</li>
                         <li class="item" draggable="true">Pêra</li>
                         <li class="item" draggable="true">Manga</li>
@@ -240,47 +240,102 @@
 
         <script>
 
-            let itemList = document.getElementsByClassName("item");
-            let lowList = document.getElementsByClassName("sub-categoria low");
-            let midList = document.getElementsByClassName("sub-categoria mid");
-            let highList = document.getElementsByClassName("sub-categoria high");
+            document.addEventListener("DOMContentLoaded", () => {
+            const sortableLists = document.querySelectorAll(".sortableLists");
 
-            for (item of itemList){
-                item.addEventListner("dragstart", function(e) {
-                    let selected = e.target;
+            // Gera um data-index único por item na primeira carga
+            sortableLists.forEach((list, listIndex) => {
+                list.querySelectorAll(".item").forEach((item, itemIndex) => {
+                    if (!item.dataset.index) {
+                        item.dataset.index = `${listIndex}-${itemIndex}`;
+                    }
+                });
+            });
 
-                    lowList.addEventListner("dragover", function(e){
-                        e.preventDefault();
+            const items = document.querySelectorAll(".item");
+
+            // Salva o local atual de cada item (em que lista ele está e a ordem)
+            const saveAllOrders = () => {
+                const itemMap = {}; // ex: { "1-0": 0 }
+
+                sortableLists.forEach((list, listIndex) => {
+                    list.querySelectorAll(".item").forEach(item => {
+                        itemMap[item.dataset.index] = listIndex;
                     });
+                });
 
-                    lowList.addEventListner("drop", function(e){
-                        lowList.appendChild(selected);
-                        selected = null;
-                    })
+                const orderMap = {};
+                sortableLists.forEach((list, listIndex) => {
+                    const order = [...list.querySelectorAll(".item")].map(item => item.dataset.index);
+                    orderMap[listIndex] = order;
+                });
 
+                localStorage.setItem("itemLocations", JSON.stringify(itemMap));
+                localStorage.setItem("itemOrders", JSON.stringify(orderMap));
+            };
 
-                    midList.addEventListner("dragover", function(e){
-                        e.preventDefault();
-                    });
+            // Restaura os itens na lista e ordem corretas
+            const restoreAllOrders = () => {
+                const itemMap = JSON.parse(localStorage.getItem("itemLocations") || "{}");
+                const orderMap = JSON.parse(localStorage.getItem("itemOrders") || "{}");
 
-                    midList.addEventListner("drop", function(e){
-                        midList.appendChild(selected);
-                        selected = null;
-                    })
+                // Move os itens para a lista correta
+                Object.keys(itemMap).forEach(dataIndex => {
+                    const targetListIndex = itemMap[dataIndex];
+                    const item = document.querySelector(`.item[data-index="${dataIndex}"]`);
+                    const targetList = sortableLists[targetListIndex];
+                    if (item && targetList) {
+                        targetList.appendChild(item);
+                    }
+                });
 
+                // Reordena os itens dentro de cada lista
+                Object.keys(orderMap).forEach(listIndex => {
+                    const list = sortableLists[listIndex];
+                    const order = orderMap[listIndex];
 
-                    highList.addEventListner("dragover", function(e){
-                        e.preventDefault();
-                    });
+                    if (list && order) {
+                        order.forEach(dataIndex => {
+                            const item = list.querySelector(`.item[data-index="${dataIndex}"]`);
+                            if (item) list.appendChild(item);
+                        });
+                    }
+                });
+            };
 
-                    highList.addEventListner("drop", function(e){
-                        highList.appendChild(selected);
-                        selected = null;
-                    })
-                })
-            }
+            restoreAllOrders();
 
+            items.forEach(item => {
+                item.addEventListener("dragstart", () => {
+                    setTimeout(() => item.classList.add("dragging"), 0);
+                });
+                item.addEventListener("dragend", () => {
+                    item.classList.remove("dragging");
+                    saveAllOrders(); // Salva em qual lista e posição o item ficou
+                });
+            });
 
+            const initSortableLists = (e) => {
+                e.preventDefault();
+                const list = e.currentTarget;
+                const draggingItem = document.querySelector(".dragging");
+
+                const siblings = [...list.querySelectorAll(".item:not(.dragging)")];
+
+                let nextSibling = siblings.find(sibling =>
+                    e.clientY <= sibling.offsetTop + sibling.offsetHeight / 2
+                );
+
+                list.insertBefore(draggingItem, nextSibling);
+            };
+
+            sortableLists.forEach(list => {
+                list.addEventListener("dragover", initSortableLists);
+                list.addEventListener("dragenter", e => e.preventDefault());
+            });
+        });
+
+            
         </script>
 
     </body>
